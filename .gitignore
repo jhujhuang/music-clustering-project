@@ -1,0 +1,28 @@
+# cmake stuff
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+CPack*.cmake
+
+# vi stuff
+*.swp
+
+
+
+.idea/
+*.iml
+.DS_Store
+.settings
+
+
+libraries/
+build/
+
+# locally used
+features/
+musicFiles/
+
+
+
+Yaafe/

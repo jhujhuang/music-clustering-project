@@ -4,6 +4,7 @@ from os import listdir
 from os.path import isfile, join
 
 _FEATURE_DIR = './features/'
+_MUSIC_DIR = './musicFiles'
 
 
 def read(filename):
@@ -16,9 +17,16 @@ def read(filename):
     files = [f for f in listdir(_FEATURE_DIR) if isfile(join(_FEATURE_DIR, f))
              and filename + '.' in f]
     for csv_name in files:
-        with open(csv_name, 'rb') as csv_file:
+        with open(join(_FEATURE_DIR, csv_name), 'rb') as csv_file:
             csv_reader = csv.reader(csv_file)
             for row in csv_reader:
                 pass
+    return ()  # TODO: return a feature tuple thing
 
-read('mozartG.mp3')
+musicFiles = [f for f in listdir(_MUSIC_DIR) if '.mp3' in f]
+allInput = []
+for musicFile in musicFiles:
+    features = read(musicFile)
+    allInput.append(features)
+
+print allInput  # TODO: delete

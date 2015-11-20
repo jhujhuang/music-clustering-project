@@ -2,6 +2,7 @@
 import csv
 from os import listdir
 from os.path import isfile, join
+from shutil import copy
 
 _FEATURE_DIR = './features/'
 _MUSIC_DIR = './musicFiles'
@@ -30,3 +31,7 @@ for musicFile in musicFiles:
     allInput.append(features)
 
 print allInput  # TODO: delete
+
+# TODO: output files to clustered directories
+# for f in musicFiles:
+#     copy(join(_MUSIC_DIR, f), './testOut/')

@@ -1,8 +1,8 @@
 
 import csv
 import numpy
-from os import listdir
-from os.path import isfile, join
+from os import listdir, makedirs
+from os.path import exists, isfile, join
 from shutil import copy
 from kmeans_lib import find_centers
 
@@ -60,7 +60,11 @@ for key in clusters:
     print "\n" + str(key) + ":\n"
     for fv in clusters[key]:
         print get_filename(fv) + " "
+        # Output files to clustered directories
+        directory = join('./testOut', str(key))
+        if not exists(directory):
+            makedirs(directory)
+        copy(join(_MUSIC_DIR, get_filename(fv)), directory)
 
-# TODO: output files to clustered directories
 # for f in musicFiles:
 #     copy(join(_MUSIC_DIR, f), './testOut/')

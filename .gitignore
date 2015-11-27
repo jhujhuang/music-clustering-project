@@ -8,6 +8,7 @@ CPack*.cmake
 # vi stuff
 *.swp
 
+*.pyc
 
 
 .idea/

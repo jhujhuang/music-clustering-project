@@ -35,7 +35,7 @@ def read(filename):
             csv_data = numpy.genfromtxt(csv_file, comments='%', delimiter=',')
             vector.append(numpy.average(csv_data))
             vector.append(numpy.var(csv_data))
-    return vector  # TODO: return a feature tuple thing
+    return vector
 
 samples = []  # For storing which features is from which file
 
@@ -49,7 +49,7 @@ for musicFile in musicFiles:
 print allInput  # TODO: delete
 
 # Clustering
-_,clusters = find_centers(allInput, 4)
+_,clusters = find_centers(allInput, K)
 
 def get_filename(feature_vector):
     for (fv, name) in samples:

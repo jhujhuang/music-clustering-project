@@ -1,9 +1,10 @@
 
 import csv
 import numpy
-from os import listdir
-from os.path import isfile, join
+from os import listdir, makedirs
+from os.path import exists, isfile, join
 from shutil import copy
+import kmeans_lib
 
 _FEATURE_DIR = './features/'
 _MUSIC_DIR = './musicFiles'
@@ -20,7 +21,7 @@ def read(filename):
     """
     files = [f for f in listdir(_FEATURE_DIR) if isfile(join(_FEATURE_DIR, f))
              and filename + '.' in f]
-    t = ()
+    vector = []
     print filename
     for csv_name in files:
         with open(join(_FEATURE_DIR, csv_name), 'rb') as csv_file:
@@ -30,22 +31,39 @@ def read(filename):
                 if hi:
                     print row
                 hi = False
-            t = t + (csv_reader.line_num,)"""  # using numpy now
+            t = t + (csv_reader.line_num,)"""  # using numpy & list now
             csv_data = numpy.genfromtxt(csv_file, comments='%', delimiter=',')
-            t = t + (numpy.average(csv_data), numpy.var(csv_data))
-    return t  # TODO: return a feature tuple thing
+            vector.append(numpy.average(csv_data))
+            vector.append(numpy.var(csv_data))
+    return vector
+
+samples = []  # For storing which features is from which file
 
 # Get features for all input samples
 musicFiles = [f for f in listdir(_MUSIC_DIR) if '.mp3' in f]
 allInput = []
 for musicFile in musicFiles:
-    features = read(musicFile)
+    features = numpy.array(read(musicFile))
     allInput.append(features)
-
+    samples.append((features, musicFile,))
 print allInput  # TODO: delete
 
 # Clustering
+clusters = kmeans_lib.cluster(allInput, K)
 
-# TODO: output files to clustered directories
-# for f in musicFiles:
-#     copy(join(_MUSIC_DIR, f), './testOut/')
+def get_filename(feature_vector):
+    for (fv, name) in samples:
+        if numpy.array_equal(fv,feature_vector):
+            return name
+
+for key in clusters:
+    print '\n' + str(key) + ':\n'
+    for fv in clusters[key]:
+        print get_filename(fv)
+        # Output files to clustered directories
+        directory = join('./testOut', str(key))
+        if not exists(directory):
+            makedirs(directory)
+        copy(join(_MUSIC_DIR, get_filename(fv)), directory)
+
+print '\nMusic files categorized successful!\n'

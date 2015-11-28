@@ -66,5 +66,3 @@ for key in clusters:
             makedirs(directory)
         copy(join(_MUSIC_DIR, get_filename(fv)), directory)
 
-# for f in musicFiles:
-#     copy(join(_MUSIC_DIR, f), './testOut/')

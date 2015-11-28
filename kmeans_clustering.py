@@ -57,12 +57,13 @@ def get_filename(feature_vector):
             return name
 
 for key in clusters:
-    print "\n" + str(key) + ":\n"
+    print '\n' + str(key) + ':\n'
     for fv in clusters[key]:
-        print get_filename(fv) + " "
+        print get_filename(fv)
         # Output files to clustered directories
         directory = join('./testOut', str(key))
         if not exists(directory):
             makedirs(directory)
         copy(join(_MUSIC_DIR, get_filename(fv)), directory)
 
+print '\nMusic files categorized successful!\n'

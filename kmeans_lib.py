@@ -1,41 +1,46 @@
 import random
-import numpy as np
+import numpy
 
-"""
-The following code is from
-https://datasciencelab.wordpress.com/2013/12/12/clustering-with-k-means-in-python/
-Delete this comment when we change to use our own code
-"""
 
-def cluster_points(X, mu):
-    clusters  = {}
-    for x in X:
-        bestmukey = min([(i[0], np.linalg.norm(x-mu[i[0]])) \
-                         for i in enumerate(mu)], key=lambda t:t[1])[0]
-        try:
-            clusters[bestmukey].append(x)
-        except KeyError:
-            clusters[bestmukey] = [x]
+def e_step(samples, mu):
+    clusters = {}
+    for x in samples:
+        cluster_found = min(enumerate(mu), key=lambda tt: numpy.linalg.norm(x-tt[1]))[0]
+        if cluster_found in clusters.keys():
+            clusters[cluster_found].append(x)
+        else:
+            clusters[cluster_found] = [x]
     return clusters
 
-def reevaluate_centers(mu, clusters):
-    newmu = []
-    keys = sorted(clusters.keys())
-    for k in keys:
-        newmu.append(np.mean(clusters[k], axis = 0))
-    return newmu
 
-def has_converged(mu, oldmu):
-    return (set([tuple(a) for a in mu]) == set([tuple(a) for a in oldmu]))
+def m_step(clusters):
+    new_mu = []
+    for k in sorted(clusters.keys()):
+        new_mu.append(numpy.mean(clusters[k], axis=0))
+    return new_mu
 
-def find_centers(X, K):
-    # Initialize to K random centers
-    oldmu = random.sample(X, K)
-    mu = random.sample(X, K)
-    while not has_converged(mu, oldmu):
-        oldmu = mu
-        # Assign all points in X to clusters
-        clusters = cluster_points(X, mu)
-        # Reevaluate centers
-        mu = reevaluate_centers(oldmu, clusters)
-    return(mu, clusters)
+
+def has_converged(mu1, mu0):
+    if not mu0:
+        return False
+    return set([tuple(t) for t in mu1]) == set([tuple(t) for t in mu0])
+
+
+def cluster(data, k):
+    """
+    Perform k-means clustering on given data.
+
+    :param data: List of array data points of same dimensions
+    :param k: Number of clusters
+    :return: A dictionary of (0 ... k-1) to clusters
+    """
+    # Initialize to k random centers
+    old_mu = None
+    mu = random.sample(data, k)
+    while not has_converged(mu, old_mu):
+        # Assign all points to clusters
+        clusters = e_step(data, mu)
+        # Reevaluate means
+        old_mu = mu
+        mu = m_step(clusters)
+    return clusters

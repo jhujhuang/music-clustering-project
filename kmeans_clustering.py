@@ -4,7 +4,7 @@ import numpy
 from os import listdir, makedirs
 from os.path import exists, isfile, join
 from shutil import copy
-from kmeans_lib import find_centers
+import kmeans_lib
 
 _FEATURE_DIR = './features/'
 _MUSIC_DIR = './musicFiles'
@@ -49,7 +49,7 @@ for musicFile in musicFiles:
 print allInput  # TODO: delete
 
 # Clustering
-_,clusters = find_centers(allInput, K)
+clusters = kmeans_lib.cluster(allInput, K)
 
 def get_filename(feature_vector):
     for (fv, name) in samples:

@@ -23,7 +23,7 @@ build/
 # locally used
 features/
 musicFiles/
-testOut/
+testOut*
 
 
 

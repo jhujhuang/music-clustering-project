@@ -9,6 +9,7 @@ import kmeans_lib
 
 _FEATURE_DIR = './features/small'
 _MUSIC_DIR = './musicFiles/small'
+_OUT_DIR = './testOut'
 
 K = 4  # Number of clusters
 
@@ -64,7 +65,7 @@ for key in clusters:
         # Output files to clustered directories
         now = datetime.today()
         run = str(now.year) + str(now.month) + str(now.day) + str(now.hour) + str(now.minute)
-        directory = join('./testOut', run, str(key))
+        directory = join(_OUT_DIR, run, str(key))
         if not exists(directory):
             makedirs(directory)
         copy(join(_MUSIC_DIR, get_filename(fv)), directory)

@@ -21,8 +21,10 @@ libraries/
 build/
 
 # locally used
-features/
-musicFiles/
+features/*
+!features/small/
+musicFiles/*
+!musicFiles/small/
 testOut*
 
 

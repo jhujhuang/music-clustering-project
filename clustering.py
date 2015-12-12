@@ -1,13 +1,14 @@
 
 import csv
+from datetime import datetime
 import numpy
 from os import listdir, makedirs
 from os.path import exists, isfile, join
 from shutil import copy
 import kmeans_lib
 
-_FEATURE_DIR = './features/'
-_MUSIC_DIR = './musicFiles'
+_FEATURE_DIR = './features/small'
+_MUSIC_DIR = './musicFiles/small'
 
 K = 4  # Number of clusters
 
@@ -61,7 +62,9 @@ for key in clusters:
     for fv in clusters[key]:
         print get_filename(fv)
         # Output files to clustered directories
-        directory = join('./testOut', str(key))
+        now = datetime.today()
+        run = str(now.year) + str(now.month) + str(now.day) + str(now.hour) + str(now.minute)
+        directory = join('./testOut', run, str(key))
         if not exists(directory):
             makedirs(directory)
         copy(join(_MUSIC_DIR, get_filename(fv)), directory)

@@ -51,7 +51,8 @@ for musicFile in musicFiles:
 print allInput  # TODO: delete
 
 # Clustering
-clusters = kmeans_lib.cluster(allInput, K)
+clusters = kmeans_lib.cluster(allInput, K)  # Kmeans
+# clusters = kmeans_lib.cluster(allInput, K, True)  # Kmeans++
 
 def get_filename(feature_vector):
     for (fv, name) in samples:

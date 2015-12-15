@@ -26,17 +26,46 @@ def has_converged(mu1, mu0):
     return set([tuple(t) for t in mu1]) == set([tuple(t) for t in mu0])
 
 
-def cluster(data, k):
+def get_kmeans_plusplus(data, k):
+    # Get first center at random
+    mu = random.sample(data, 1)
+    n = len(data)
+    distance_prob = [0 for _ in range(n)]
+
+    def find_nearest_center_distance(x):
+        return min(abs(numpy.linalg.norm(x - center)) for center in mu)
+
+    while len(mu) < k:
+        # Compute all D(x)
+        for i in range(0, n-1):
+            distance_prob[i] = pow(find_nearest_center_distance(data[i]), 2)
+            print distance_prob[i]  # TODO: DELETE
+        # Normalize probabilities
+        sum_distance_square = sum(distance_prob)
+        distance_prob = [p / sum_distance_square for p in distance_prob]
+        # Choose one new center
+        choice = numpy.random.choice(range(n), p=distance_prob)
+        mu.append(data[choice])
+    return mu
+
+
+def cluster(data, k, plusplus=False):
     """
     Perform k-means clustering on given data.
 
     :param data: List of array data points of same dimensions
     :param k: Number of clusters
+    :param plusplus: Whether or not to use kmeans++ initialization
     :return: A dictionary of (0 ... k-1) to clusters
     """
     # Initialize to k random centers
     old_mu = None
-    mu = random.sample(data, k)
+    if plusplus:
+        mu = get_kmeans_plusplus(data, k)
+    else:
+        mu = random.sample(data, k)
+
+    # Run EM until convergence
     while not has_converged(mu, old_mu):
         # Assign all points to clusters
         clusters = e_step(data, mu)

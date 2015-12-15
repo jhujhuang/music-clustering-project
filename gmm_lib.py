@@ -2,6 +2,7 @@ import random
 import numpy
 import kmeans_lib
 
+_CONVERGE_ORDER = 6
 
 class GMM(object):
 
@@ -16,19 +17,59 @@ class GMM(object):
         # Initialize pi as equally likely
         self.pi = numpy.ones(k) / k
 
+    def find_clusters(self):
+        old_log_ll = None
+        log_ll = self._find_log_likelihood()
+        # Run EM until convergence
+        while not self._has_converged(log_ll, old_log_ll):
+            # TODO: e m
+            old_log_ll = log_ll
+            log_ll = self._find_log_likelihood()
+        return []  # TODO
+
     def _initialize_centers(self, pp):
         if pp:
             return kmeans_lib.get_kmeans_plusplus(self.data, self.k)
         else:
             return random.sample(self.data, self.k)
 
-    def find_clusters(self):
-        # Run EM until convergence
-        while not self._has_converged():
-            pass  # TODO
+    def _has_converged(self, log_ll, old_log_ll):
+        if not old_log_ll:
+            # Before first iteration
+            return False
+        increase = log_ll - old_log_ll
+        if not self.first_check_increase:
+            # First iteration
+            self.first_check_increase = increase
+        return increase < self.first_check_increase * 10 ** (-_CONVERGE_ORDER)
 
-    def _has_converged(self):
-        pass
+    def _find_log_likelihood(self):
+
+        def pdf_multivariate_gauss(x, mu, cov):
+            """ This helper method was edited from the example from
+                https://www.reddit.com/r/Python/comments/236odt/is_there_really_no_good_library_for_a/
+
+                Calculate the multivariate normal density (pdf)
+
+                Keyword arguments:
+                    x = numpy array of a "d x 1" sample vector
+                    mu = numpy array of a "d x 1" mean vector
+                    cov = "numpy array of a d x d" covariance matrix
+            """
+            assert(mu.shape[0] > mu.shape[1]), 'mu must be a row vector'
+            assert(x.shape[0] > x.shape[1]), 'x must be a row vector'
+            assert(cov.shape[0] == cov.shape[1]), 'covariance matrix must be square'
+            assert(mu.shape[0] == cov.shape[0]), 'cov_mat and mu_vec must have the same dimensions'
+            assert(mu.shape[0] == x.shape[0]), 'mu and x must have the same dimensions'
+            part1 = 1 / (((2 * numpy.pi)**(len(mu)/2)) * (numpy.linalg.det(cov)**(1/2)))
+            part2 = (-1/2) * ((x-mu).T.dot(numpy.linalg.inv(cov))).dot((x-mu))
+            return float(part1 * numpy.exp(part2))
+
+        return sum(
+            [numpy.log(sum(
+                [self.pi[k] * pdf_multivariate_gauss(xx, self.mu[k], self.cov[k]) for k in range(0, self.k)]
+            )) for xx in self.data]
+        )
 
 
 def cluster(data, k, plusplus=False):

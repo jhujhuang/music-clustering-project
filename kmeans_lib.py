@@ -30,16 +30,13 @@ def get_kmeans_plusplus(data, k):
     # Get first center at random
     mu = random.sample(data, 1)
     n = len(data)
-    distance_prob = [0 for _ in range(n)]
 
     def find_nearest_center_distance(x):
         return min(abs(numpy.linalg.norm(x - center)) for center in mu)
 
     while len(mu) < k:
         # Compute all D(x)
-        for i in range(0, n-1):
-            distance_prob[i] = pow(find_nearest_center_distance(data[i]), 2)
-            print distance_prob[i]  # TODO: DELETE
+        distance_prob = [pow(find_nearest_center_distance(x), 2) for x in data]
         # Normalize probabilities
         sum_distance_square = sum(distance_prob)
         distance_prob = [p / sum_distance_square for p in distance_prob]

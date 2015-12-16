@@ -38,7 +38,7 @@ def read(filename):
             csv_data = numpy.genfromtxt(csv_file, comments='%', delimiter=',')
             vector.append(numpy.average(csv_data))
             vector.append(numpy.var(csv_data))
-    return vector[0:6] # [0:6] for a smaller dimension for gaussian density computing
+    return vector  # [0:6] for a smaller dimension for gaussian density computing
 
 samples = []  # For storing which features is from which file
 
@@ -53,8 +53,8 @@ print allInput  # TODO: delete
 
 # Clustering
 # clusters = kmeans_lib.cluster(allInput, K)  # Kmeans
-# clusters = kmeans_lib.cluster(allInput, K, True)  # Kmeans++
-clusters = gmm_lib.cluster(allInput, K, True)  # GMM with Kmeans++: have to decrease dimension!
+clusters = kmeans_lib.cluster(allInput, K, True)  # Kmeans++
+# clusters = gmm_lib.cluster(allInput, K, True)  # GMM with Kmeans++: have to decrease dimension!
 
 def get_filename(feature_vector):
     for (fv, name) in samples:

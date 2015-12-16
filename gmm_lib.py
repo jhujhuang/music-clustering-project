@@ -72,12 +72,12 @@ class GMM(object):
         resp = [numpy.zeros(self.k)] * self.num_samples
         # TODO: DEBUG!!!!!!
         for i in range(self.num_samples):
+            temp = []
             for k in range(self.k):
-                print "pdf is ", pdf_multivariate_gauss(self.data[i], self.mu[k], self.cov[k])
-                resp[i][k] = self.pi[k] * pdf_multivariate_gauss(self.data[i], self.mu[k], self.cov[k])
-            print resp[i], i, self.pi
-            sum_resp = sum([resp[i][k] for k in range(self.k)])
-            resp[i] = [r / sum_resp for r in resp[i]]  # Normalize
+                temp.append(self.pi[k] * pdf_multivariate_gauss(self.data[i], self.mu[k], self.cov[k]))
+            #print resp[i], i, self.pi
+            sum_resp = sum(temp)
+            resp[i] = [r / sum_resp for r in temp]  # Normalize
         return resp
 
     def _update_parameters(self, resp):
@@ -134,3 +134,14 @@ def cluster(data, k, plusplus=False):
     """
     gmm = GMM(data, k, plusplus)
     return gmm.find_clusters()
+
+#test_data = [numpy.array([1,2,3]), numpy.array([1,2,3]), numpy.array([1,2,3]), numpy.array([1,8,9]), numpy.array([3,2,1])]
+#print cluster(test_data, 3, True)
+
+""" Test for pdf_multivariate_gauss
+x = numpy.array([0, 0])
+mu  = numpy.array([0, 0])
+cov = numpy.eye(2)
+
+print pdf_multivariate_gauss(x, mu, cov)
+"""

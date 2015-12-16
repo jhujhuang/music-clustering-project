@@ -71,7 +71,7 @@ for key in clusters:
         print get_filename(fv)
         # Output files to clustered directories
         now = datetime.today()
-        run = str(now.year) + str(now.month) + str(now.day) + str(now.hour) + str(now.minute)
+        run = str(now.year) + str(now.month) + str(now.day) + str(now.hour) + str(now.minute) + method
         directory = join(_OUT_DIR, run, str(key))
         if not exists(directory):
             makedirs(directory)

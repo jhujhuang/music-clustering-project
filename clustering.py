@@ -1,15 +1,18 @@
 
 import csv
 from datetime import datetime
+from matplotlib.pyplot import scatter, title, savefig, clf
 import numpy
 from os import listdir, makedirs
 from os.path import exists, isfile, join
 from shutil import copy
+from sklearn.metrics import silhouette_score
+import tsne
 import gmm_lib
 import kmeans_lib
 
-_FEATURE_DIR = './features/small'
-_MUSIC_DIR = './musicFiles/small'
+_FEATURE_DIR = './features'
+_MUSIC_DIR = './musicFiles'
 _OUT_DIR = './testOut'
 
 K = 4  # Number of clusters
@@ -52,6 +55,7 @@ for musicFile in musicFiles:
 print allInput  # TODO: delete
 
 # Clustering
+method = 'kmeans++'
 # clusters = kmeans_lib.cluster(allInput, K)  # Kmeans
 clusters = kmeans_lib.cluster(allInput, K, True)  # Kmeans++
 # clusters = gmm_lib.cluster(allInput, K, True)  # GMM with Kmeans++: have to decrease dimension!
@@ -74,3 +78,24 @@ for key in clusters:
         copy(join(_MUSIC_DIR, get_filename(fv)), directory)
 
 print '\nMusic files categorized successful!\n'
+
+X = []
+y = []
+for key in clusters:
+    for fv in clusters[key]:
+        X.append(fv)
+        y.append(key)
+X = numpy.array(X)
+y = numpy.array(y)
+
+#  Plot data points
+for i in range(5):
+    X_2d = tsne.bh_sne(X, perplexity=5)
+    scatter(X_2d[:, 0], X_2d[:, 1], c=y)
+    title(method + " with k = " + str(K))
+    savefig('testOut/' + run + str(i) + '.png')
+    clf()
+
+#  Calculate silhouette score
+silhouette_avg = silhouette_score(X, y)
+print 'The average silhouette score is: ', silhouette_avg

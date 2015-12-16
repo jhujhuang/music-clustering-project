@@ -5,6 +5,7 @@ import numpy
 from os import listdir, makedirs
 from os.path import exists, isfile, join
 from shutil import copy
+import gmm_lib
 import kmeans_lib
 
 _FEATURE_DIR = './features/small'
@@ -37,7 +38,7 @@ def read(filename):
             csv_data = numpy.genfromtxt(csv_file, comments='%', delimiter=',')
             vector.append(numpy.average(csv_data))
             vector.append(numpy.var(csv_data))
-    return vector
+    return vector  # [0:6] for a smaller dimension for gaussian density computing
 
 samples = []  # For storing which features is from which file
 
@@ -51,8 +52,9 @@ for musicFile in musicFiles:
 print allInput  # TODO: delete
 
 # Clustering
-clusters = kmeans_lib.cluster(allInput, K)  # Kmeans
-# clusters = kmeans_lib.cluster(allInput, K, True)  # Kmeans++
+# clusters = kmeans_lib.cluster(allInput, K)  # Kmeans
+clusters = kmeans_lib.cluster(allInput, K, True)  # Kmeans++
+# clusters = gmm_lib.cluster(allInput, K, True)  # GMM with Kmeans++: have to decrease dimension!
 
 def get_filename(feature_vector):
     for (fv, name) in samples:

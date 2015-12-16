@@ -1,8 +1,9 @@
+from __future__ import division
 import random
 import numpy
 import kmeans_lib
 
-_CONVERGE_ORDER = 6
+_CONVERGE_ORDER = 2.2
 
 class GMM(object):
 
@@ -14,13 +15,15 @@ class GMM(object):
         self.mu = self._initialize_centers(plusplus)
         # Initialize covariance as identity matrices
         m = len(data[0])
-        self.cov = numpy.identity(m) * k
+        self.cov = [numpy.identity(m)] * k
         # Initialize pi as equally likely
         self.pi = numpy.ones(k) / k
+        self.first_check_increase = None
 
     def find_clusters(self):
         old_log_ll = None
         log_ll = self._find_log_likelihood()
+        print log_ll, "       IS LOG LIKEL"
         # Run EM until convergence
         while not self._has_converged(log_ll, old_log_ll):
             # E Step
@@ -30,7 +33,17 @@ class GMM(object):
 
             old_log_ll = log_ll
             log_ll = self._find_log_likelihood()
-        return []  # TODO
+
+        # associate each point with the most likely cluster
+        clusters = {}
+        resp = self._get_current_responsibilities()
+        for i in range(self.num_samples):
+            cluster_found = max(range(self.k), key=lambda kk:resp[i][kk])
+            if cluster_found in clusters.keys():
+                clusters[cluster_found].append(self.data[i])
+            else:
+                clusters[cluster_found] = [self.data[i]]
+        return clusters
 
     def _initialize_centers(self, pp):
         if pp:
@@ -51,16 +64,20 @@ class GMM(object):
     def _find_log_likelihood(self):
         return sum(
             [numpy.log(sum(
-                [self.pi[k] * pdf_multivariate_gauss(xx, self.mu[k], self.cov[k]) for k in range(0, self.k)]
+                [self.pi[k] * pdf_multivariate_gauss(xx, self.mu[k], self.cov[k]) for k in range(self.k)]
             )) for xx in self.data]
         )
 
     def _get_current_responsibilities(self):
-        resp = numpy.zeros(self.num_samples, self.k)
+        resp = [numpy.zeros(self.k)] * self.num_samples
+        # TODO: DEBUG!!!!!!
         for i in range(self.num_samples):
             for k in range(self.k):
+                print "pdf is ", pdf_multivariate_gauss(self.data[i], self.mu[k], self.cov[k])
                 resp[i][k] = self.pi[k] * pdf_multivariate_gauss(self.data[i], self.mu[k], self.cov[k])
-            resp[i] = resp[i] / sum(resp[i])  # Normalize
+            print resp[i], i, self.pi
+            sum_resp = sum([resp[i][k] for k in range(self.k)])
+            resp[i] = [r / sum_resp for r in resp[i]]  # Normalize
         return resp
 
     def _update_parameters(self, resp):
@@ -72,12 +89,14 @@ class GMM(object):
             ) / big_n[k]
         # Update cov
         for k in range(self.k):
-            self.cov[k] = sum(
-                [resp[i][k] * (self.data[i] - self.mu[k]).dot(numpy.transpose(self.data[i] - self.mu[k]))
-                 for i in range(self.num_samples)]
-            ) / big_n[k]
+            self.cov[k] = numpy.array([[0.0]*len(self.data[0])] * len(self.data[0]))
+            for i in range (1, self.num_samples):
+                diff = self.data[i] - self.mu[k]
+                add = numpy.transpose(numpy.matrix(diff)).dot(numpy.matrix(diff))# / big_n[k]
+                self.cov[k] += add / big_n[k]
+
         # Update pi
-        self.pi = big_n / self.num_samples
+        self.pi = [nk / float(self.num_samples) for nk in big_n]
 
 
 def pdf_multivariate_gauss(x, mu, cov):
@@ -91,13 +110,17 @@ def pdf_multivariate_gauss(x, mu, cov):
             mu = numpy array of a "d x 1" mean vector
             cov = "numpy array of a d x d" covariance matrix
     """
-    assert(mu.shape[0] > mu.shape[1]), 'mu must be a row vector'
-    assert(x.shape[0] > x.shape[1]), 'x must be a row vector'
     assert(cov.shape[0] == cov.shape[1]), 'covariance matrix must be square'
     assert(mu.shape[0] == cov.shape[0]), 'cov_mat and mu_vec must have the same dimensions'
     assert(mu.shape[0] == x.shape[0]), 'mu and x must have the same dimensions'
     part1 = 1 / (((2 * numpy.pi)**(len(mu)/2)) * (numpy.linalg.det(cov)**(1/2)))
-    part2 = (-1/2) * ((x-mu).T.dot(numpy.linalg.inv(cov))).dot((x-mu))
+    diff = numpy.transpose(numpy.matrix(x - mu))
+
+    trans = numpy.transpose(diff)
+    cov_inv = numpy.matrix(numpy.linalg.inv(cov))
+    transtimescovinv = numpy.matrix(trans.dot(cov_inv))
+    part2 = (-1/2) * transtimescovinv.dot(diff)
+    result = part1 * numpy.exp(part2)
     return float(part1 * numpy.exp(part2))
 
 
